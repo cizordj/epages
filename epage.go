@@ -50,8 +50,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Using token: %s\n", *token)
-	fmt.Printf("Using project name: %s\n", *projectName)
-	fmt.Printf("Using account ID: %s\n", *accountId)
-	fmt.Printf("Using folder: %s\n", *folder)
+	missingFlags = nil
+
+	var _, folderErr = os.ReadDir(*folder)
+
+	if folderErr != nil {
+		fmt.Printf("%s\n", folderErr.Error())
+		os.Exit(1)
+	}
 }
