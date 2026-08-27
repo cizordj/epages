@@ -38,7 +38,7 @@ func GenerateFileHashMap(root string) (map[string]string, error) {
 			return err
 		}
 
-		hashMap[relPath] = hex.EncodeToString(hash.Sum(nil))
+		hashMap[hex.EncodeToString(hash.Sum(nil))] = relPath
 
 		return nil
 	})

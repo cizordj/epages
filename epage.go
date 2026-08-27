@@ -1,7 +1,8 @@
 package main
 
 import (
-	upload "epage/internal/cloudflare"
+	"epage/internal/cloudflare/deployment"
+	"epage/internal/cloudflare/upload"
 	"epage/internal/hasher"
 	"fmt"
 	"os"
@@ -76,28 +77,17 @@ func main() {
 	uploadToken := upload.GetUploadToken(client, projectName, accountId)
 
 	setOfHashes := make([]string, 0, len(fileHashMap))
-	for _, hash := range fileHashMap {
+	for hash := range fileHashMap {
 		setOfHashes = append(setOfHashes, hash)
 	}
 
-	missingAssets := upload.CheckMissingAssets(client, setOfHashes, uploadToken)
+	missingAssetsHash := upload.CheckMissingAssets(client, setOfHashes, uploadToken)
 	newFileHashMap := make(map[string]string)
 
-	missingSet := make(map[string]bool, len(missingAssets))
-
-	for _, path := range missingAssets {
-		missingSet[path] = true
-	}
-
-	for hash, path := range fileHashMap {
-		if missingSet[path] {
-			newFileHashMap[hash] = path
-		}
-	}
-
-	for _, value := range newFileHashMap {
-		fmt.Printf("%s\n", value)
+	for _, hash := range missingAssetsHash {
+		newFileHashMap[hash] = fileHashMap[hash]
 	}
 
 	upload.UploadAssets(client, newFileHashMap, uploadToken, *folder)
+	deployment.CreateDeployment(client, projectName, accountId, fileHashMap)
 }
