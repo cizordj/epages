@@ -1,6 +1,7 @@
 package main
 
 import (
+	"epage/internal/hasher"
 	"fmt"
 	"os"
 	"strings"
@@ -57,5 +58,15 @@ func main() {
 	if folderErr != nil {
 		fmt.Printf("%s\n", folderErr.Error())
 		os.Exit(1)
+	}
+
+	fileHashes, err := hasher.GenerateFileHashMap(*folder)
+	if err != nil {
+		fmt.Printf("Error generating file hashes: %s\n", err.Error())
+		os.Exit(1)
+	}
+
+	for path, hash := range fileHashes {
+		fmt.Printf("%s: %s\n", path, hash)
 	}
 }
