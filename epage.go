@@ -79,5 +79,18 @@ func main() {
 	for k := range fileHashMap {
 		setOfHashes = append(setOfHashes, k)
 	}
-	upload.CheckMissingAssets(client, setOfHashes, uploadToken)
+	missingAssets := upload.CheckMissingAssets(client, setOfHashes, uploadToken)
+	newFileHashMap := make(map[string]string)
+
+	missingSet := make(map[string]bool, len(missingAssets))
+	for _, path := range missingAssets {
+		missingSet[path] = true
+	}
+
+	for hash, path := range fileHashMap {
+		if missingSet[path] {
+			newFileHashMap[hash] = path
+		}
+	}
+
 }

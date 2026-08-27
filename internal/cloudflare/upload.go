@@ -23,7 +23,7 @@ func GetUploadToken(client *cloudflare.Client, projectName *string, accountId *s
 	return response.JWT
 }
 
-func CheckMissingAssets(client *cloudflare.Client, hashes []string, uploadToken string) {
+func CheckMissingAssets(client *cloudflare.Client, hashes []string, uploadToken string) []string {
 	page, err := client.Pages.Assets.CheckMissing(context.TODO(), pages.AssetCheckMissingParams{
 		Hashes: cloudflare.F(hashes),
 	},
@@ -32,5 +32,24 @@ func CheckMissingAssets(client *cloudflare.Client, hashes []string, uploadToken 
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("%+v\n", page)
+	return page.Result
+}
+
+func UploadAssets(client *cloudflare.Client, hashFileMap map[string]string, uploadToken string) {
+	response, err := client.Pages.Assets.Upload(context.TODO(), pages.AssetUploadParams{
+		Body: []pages.AssetUploadParamsBody{{
+			Base64: cloudflare.F(true),
+			Key:    cloudflare.F("b026324c6904b2a9cb4b88d6d61c81d1"),
+			Metadata: cloudflare.F(pages.AssetUploadParamsBodyMetadata{
+				ContentType: cloudflare.F("text/plain"),
+			}),
+			Value: cloudflare.F("SGVsbG8sIFdvcmxkIQ=="),
+		}},
+	},
+		option.WithHeader("Authorization", fmt.Sprintf("Bearer %s", uploadToken)),
+	)
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Printf("%+v\n", response.Errors)
 }
