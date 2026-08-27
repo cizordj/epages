@@ -1,11 +1,14 @@
 package main
 
 import (
+	upload "epage/internal/cloudflare"
 	"epage/internal/hasher"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/cloudflare/cloudflare-go/v7"
+	"github.com/cloudflare/cloudflare-go/v7/option"
 	"github.com/spf13/pflag"
 )
 
@@ -60,13 +63,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	fileHashes, err := hasher.GenerateFileHashMap(*folder)
+	fileHashMap, err := hasher.GenerateFileHashMap(*folder)
 	if err != nil {
 		fmt.Printf("Error generating file hashes: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	for path, hash := range fileHashes {
-		fmt.Printf("%s: %s\n", path, hash)
+	client := cloudflare.NewClient(
+		option.WithAPIToken(*token),
+	)
+
+	uploadToken := upload.GetUploadToken(client, projectName, accountId)
+
+	setOfHashes := make([]string, 0, len(fileHashMap))
+	for k := range fileHashMap {
+		setOfHashes = append(setOfHashes, k)
 	}
+	upload.CheckMissingAssets(client, setOfHashes, uploadToken)
 }
