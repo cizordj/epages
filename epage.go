@@ -93,4 +93,11 @@ func main() {
 		}
 	}
 
+	fmt.Printf("Number of files that need to be uploaded: %d\n", len(newFileHashMap))
+
+	for _, value := range newFileHashMap {
+		fmt.Printf("%s\n", value)
+	}
+
+	upload.UploadAssets(client, newFileHashMap, uploadToken, *folder)
 }

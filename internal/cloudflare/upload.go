@@ -2,7 +2,9 @@ package upload
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"os"
 
 	"github.com/cloudflare/cloudflare-go/v7"
 	"github.com/cloudflare/cloudflare-go/v7/option"
@@ -35,21 +37,48 @@ func CheckMissingAssets(client *cloudflare.Client, hashes []string, uploadToken 
 	return page.Result
 }
 
-func UploadAssets(client *cloudflare.Client, hashFileMap map[string]string, uploadToken string) {
-	response, err := client.Pages.Assets.Upload(context.TODO(), pages.AssetUploadParams{
-		Body: []pages.AssetUploadParamsBody{{
+func UploadAssets(client *cloudflare.Client, hashFileMap map[string]string, uploadToken string, rootDir string) {
+	const batchSize = 50
+	
+	batch := make([]pages.AssetUploadParamsBody, 0, batchSize)
+
+	for hash, relPath := range hashFileMap {
+		fullPath := fmt.Sprintf("%s/%s", rootDir, relPath)
+		fileBytes, err := os.ReadFile(fullPath)
+		if err != nil {
+			fmt.Printf("Warning: failed to read file %s: %v\n", fullPath, err)
+			continue
+		}
+
+		encodedVal := base64.StdEncoding.EncodeToString(fileBytes)
+
+		batch = append(batch, pages.AssetUploadParamsBody{
 			Base64: cloudflare.F(true),
-			Key:    cloudflare.F("b026324c6904b2a9cb4b88d6d61c81d1"),
-			Metadata: cloudflare.F(pages.AssetUploadParamsBodyMetadata{
-				ContentType: cloudflare.F("text/plain"),
-			}),
-			Value: cloudflare.F("SGVsbG8sIFdvcmxkIQ=="),
-		}},
-	},
+			Key:    cloudflare.F(hash),
+			Value:  cloudflare.F(encodedVal),
+		})
+
+		if len(batch) >= batchSize {
+			sendBatch(client, batch, uploadToken)
+			batch = batch[:0]
+		}
+	}
+
+	if len(batch) > 0 {
+		sendBatch(client, batch, uploadToken)
+	}
+}
+
+func sendBatch(client *cloudflare.Client, batch []pages.AssetUploadParamsBody, uploadToken string) {
+	_, err := client.Pages.Assets.Upload(
+		context.TODO(),
+		pages.AssetUploadParams{
+			Body: batch,
+		},
 		option.WithHeader("Authorization", fmt.Sprintf("Bearer %s", uploadToken)),
 	)
 	if err != nil {
-		panic(err.Error())
+		panic(fmt.Sprintf("Failed to upload asset batch: %s", err.Error()))
 	}
-	fmt.Printf("%+v\n", response.Errors)
+	fmt.Printf("Successfully uploaded a batch of %d assets.\n", len(batch))
 }
