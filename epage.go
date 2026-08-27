@@ -76,13 +76,15 @@ func main() {
 	uploadToken := upload.GetUploadToken(client, projectName, accountId)
 
 	setOfHashes := make([]string, 0, len(fileHashMap))
-	for k := range fileHashMap {
-		setOfHashes = append(setOfHashes, k)
+	for _, hash := range fileHashMap {
+		setOfHashes = append(setOfHashes, hash)
 	}
+
 	missingAssets := upload.CheckMissingAssets(client, setOfHashes, uploadToken)
 	newFileHashMap := make(map[string]string)
 
 	missingSet := make(map[string]bool, len(missingAssets))
+
 	for _, path := range missingAssets {
 		missingSet[path] = true
 	}
@@ -92,8 +94,6 @@ func main() {
 			newFileHashMap[hash] = path
 		}
 	}
-
-	fmt.Printf("Number of files that need to be uploaded: %d\n", len(newFileHashMap))
 
 	for _, value := range newFileHashMap {
 		fmt.Printf("%s\n", value)

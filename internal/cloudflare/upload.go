@@ -38,7 +38,7 @@ func CheckMissingAssets(client *cloudflare.Client, hashes []string, uploadToken 
 }
 
 func UploadAssets(client *cloudflare.Client, hashFileMap map[string]string, uploadToken string, rootDir string) {
-	const batchSize = 50
+	const batchSize = 100
 	
 	batch := make([]pages.AssetUploadParamsBody, 0, batchSize)
 
