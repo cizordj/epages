@@ -1,12 +1,13 @@
 package manifest
 
+import "fmt"
+
 // Entry is one deployable asset.
 type Entry struct {
 	Path string // deployment-relative path, forward slashes, e.g. "assets/logo.svg"
 	Hash string // Cloudflare Pages content hash (see hash.go)
 }
 
-// Manifest is an ordered, dual-indexed collection of Entries.
 type Manifest struct {
 	entries []Entry
 	byPath  map[string]int
@@ -40,7 +41,6 @@ func (m *Manifest) lookup(idx map[string]int, key string) (Entry, bool) {
 	return m.entries[i], true
 }
 
-// Hashes returns every hash, for the check-missing call.
 func (m *Manifest) Hashes() []string {
 	out := make([]string, len(m.entries))
 	for i, e := range m.entries {
@@ -49,8 +49,6 @@ func (m *Manifest) Hashes() []string {
 	return out
 }
 
-// Subset returns a new Manifest containing only the given hashes —
-// exactly what you need after check-missing tells you what to upload.
 func (m *Manifest) Subset(hashes []string) *Manifest {
 	sub := New()
 	for _, h := range hashes {
@@ -61,12 +59,25 @@ func (m *Manifest) Subset(hashes []string) *Manifest {
 	return sub
 }
 
-// APIManifest returns the {path: hash} map the "create deployment" call
-// expects in its `manifest` field.
 func (m *Manifest) APIManifest() map[string]string {
 	out := make(map[string]string, len(m.entries))
 	for _, e := range m.entries {
-		out[e.Path] = e.Hash
+		out[fmt.Sprintf("/%s", e.Path)] = e.Hash
 	}
 	return out
+}
+
+func (m *Manifest) Exclude(hashes []string) *Manifest {
+	skip := make(map[string]struct{}, len(hashes))
+	for _, h := range hashes {
+		skip[h] = struct{}{}
+	}
+
+	sub := New()
+	for _, e := range m.entries {
+		if _, found := skip[e.Hash]; !found {
+			sub.Add(e.Path, e.Hash)
+		}
+	}
+	return sub
 }

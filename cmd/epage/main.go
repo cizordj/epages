@@ -17,12 +17,15 @@ func main() {
 		logging.Fatal(err)
 	}
 
-	manifest, err := manifest.GenerateHashMap(cfg.Folder)
+	files, err := manifest.GenerateHashMap(cfg.Folder)
 
 	if err != nil {
 		logging.Fatal(err)
 	}
-	logging.Info("detected files for upload", "count", manifest.Len())
+
+	ignoredFiles := manifest.GetIgnoredFiles(files)
+
+	logging.Info("detected files for upload", "count", files.Len()-ignoredFiles.Len())
 
 	client := cf.WithClient(cfg)
 
@@ -32,7 +35,12 @@ func main() {
 		logging.Fatal(err)
 	}
 
-	missingFiles, err := cf.CheckMissingAssets(client, uploadToken, manifest)
+	missingFiles, err := cf.CheckMissingAssets(
+		client,
+		uploadToken,
+		files,
+		ignoredFiles,
+	)
 
 	if err != nil {
 		logging.Fatal(err)
@@ -40,7 +48,7 @@ func main() {
 
 	cf.UploadAssets(client, missingFiles, cfg, uploadToken)
 
-	deploymentInfo, err := cf.CreateDeployment(client, cfg, manifest)
+	deploymentInfo, err := cf.CreateDeployment(client, cfg, files, ignoredFiles)
 
 	if err != nil {
 		logging.Fatal(err)
@@ -52,7 +60,7 @@ func main() {
 		logging.Fatal(err)
 	}
 
-	err = cf.UpsertAssetHashes(client, missingFiles, uploadToken)
+	err = cf.UpsertAssetHashes(client, files, uploadToken)
 
 	if err != nil {
 		logging.Fatal(err)

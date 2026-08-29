@@ -15,7 +15,7 @@ func UpsertAssetHashes(
 	client *cloudflare.Client,
 	manifest *manifest.Manifest,
 	token *auth.Token,
-) (error) {
+) error {
 	_, err := client.Pages.Assets.UpsertHashes(
 		context.TODO(),
 		pages.AssetUpsertHashesParams{

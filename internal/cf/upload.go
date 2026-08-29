@@ -8,6 +8,7 @@ import (
 	"epage/internal/logging"
 	"epage/internal/manifest"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/cloudflare/cloudflare-go/v7"
@@ -45,6 +46,11 @@ func UploadAssets(
 			Base64: cloudflare.F(true),
 			Key:    cloudflare.F(entry.Hash),
 			Value:  cloudflare.F(encodedVal),
+			Metadata: cloudflare.F(
+				pages.AssetUploadParamsBodyMetadata{
+					ContentType: cloudflare.F(http.DetectContentType(fileBytes)),
+				},
+			),
 		})
 
 		if len(batch) >= int(cfg.MaxUploadCount) {

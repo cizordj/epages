@@ -12,11 +12,18 @@ import (
 	"github.com/cloudflare/cloudflare-go/v7/pages"
 )
 
-func CheckMissingAssets(client *cloudflare.Client, uploadToken *auth.Token, man *manifest.Manifest) (*manifest.Manifest, error) {
+func CheckMissingAssets(
+	client *cloudflare.Client,
+	uploadToken *auth.Token,
+	files *manifest.Manifest,
+	ignoredFiles *manifest.Manifest,
+) (*manifest.Manifest, error) {
 	page, err := client.Pages.Assets.CheckMissing(
 		context.TODO(),
 		pages.AssetCheckMissingParams{
-			Hashes: cloudflare.F(man.Hashes()),
+			Hashes: cloudflare.F(
+				files.Exclude(ignoredFiles.Hashes()).Hashes(),
+			),
 		},
 		option.WithHeader(
 			"Authorization",
@@ -31,5 +38,5 @@ func CheckMissingAssets(client *cloudflare.Client, uploadToken *auth.Token, man 
 		"count",
 		len(page.Result),
 	)
-	return man.Subset(page.Result), nil
+	return files.Subset(page.Result), nil
 }

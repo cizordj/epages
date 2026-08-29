@@ -26,3 +26,15 @@ func GenerateHashMap(root string) (*Manifest, error) {
 
 	return m, nil
 }
+
+func GetIgnoredFiles(m *Manifest) *Manifest {
+	var ignoredPaths = [3]string{"_headers", "_redirects", ".gitkeep"}
+	ignoredFiles := New()
+	for _, path := range ignoredPaths {
+		entry, ok := m.ByPath(path)
+		if ok {
+			ignoredFiles.Add(entry.Path, entry.Hash)
+		}
+	}
+	return ignoredFiles
+}
