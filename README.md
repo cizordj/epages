@@ -1,5 +1,5 @@
 # Build
 
 ```sh
-go run epage.go
+go run cmd/epage/main.go --log-level debug
 ```

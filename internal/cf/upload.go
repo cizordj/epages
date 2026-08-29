@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"epage/internal/auth"
 	"epage/internal/config"
+	"epage/internal/contenttype"
 	"epage/internal/logging"
 	"epage/internal/manifest"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/cloudflare/cloudflare-go/v7"
@@ -41,6 +41,7 @@ func UploadAssets(
 		}
 
 		encodedVal := base64.StdEncoding.EncodeToString(fileBytes)
+		contentType := contenttype.Detect(fullPath, fileBytes)
 
 		batch = append(batch, pages.AssetUploadParamsBody{
 			Base64: cloudflare.F(true),
@@ -48,7 +49,7 @@ func UploadAssets(
 			Value:  cloudflare.F(encodedVal),
 			Metadata: cloudflare.F(
 				pages.AssetUploadParamsBodyMetadata{
-					ContentType: cloudflare.F(http.DetectContentType(fileBytes)),
+					ContentType: cloudflare.F(contentType),
 				},
 			),
 		})
