@@ -16,7 +16,7 @@ var (
 	accountId      *string
 	folder         *string
 	logLevel       *string
-	maxUploadCount *uint8
+	maxUploadCount *uint16
 )
 
 type Config struct {
@@ -24,8 +24,7 @@ type Config struct {
 	ProjectName    string
 	AccountId      string
 	Folder         string
-	LogLevel       logging.Level
-	MaxUploadCount uint8
+	MaxUploadCount uint16
 }
 
 func DefineFlags() {
@@ -59,10 +58,10 @@ func DefineFlags() {
 		"",
 		"The folder containing the assets to deploy",
 	)
-	maxUploadCount = pflag.Uint8P(
+	maxUploadCount = pflag.Uint16P(
 		"max-upload-count",
 		"m",
-		uint8(100),
+		uint16(500),
 		"The maximum number of files to be uploaded at once",
 	)
 }
@@ -74,6 +73,13 @@ func ParseConfig() (*Config, error) {
 		pflag.Usage()
 		return &Config{}, errors.New("")
 	}
+
+	logLevel, err := logging.ParseLevel(*logLevel)
+
+	if err != nil {
+		return &Config{}, err
+	}
+	logging.Init(logLevel)
 
 	var missingFlags []string
 	if *token == "" {
@@ -99,18 +105,11 @@ func ParseConfig() (*Config, error) {
 
 	missingFlags = nil
 
-	logLevel, err := logging.ParseLevel(*logLevel)
-
-	if err != nil {
-		return &Config{}, err
-	}
-
 	return &Config{
 		Token:          *token,
 		ProjectName:    *projectName,
 		AccountId:      *accountId,
 		Folder:         *folder,
-		LogLevel:       logLevel,
 		MaxUploadCount: *maxUploadCount,
 	}, nil
 }

@@ -2,6 +2,7 @@ package cf
 
 import (
 	"context"
+	"epage/internal/auth"
 	"epage/internal/config"
 	"epage/internal/logging"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/cloudflare/cloudflare-go/v7/pages"
 )
 
-func GetUploadToken(client *cloudflare.Client, cfg *config.Config) (string, error) {
+func GenUploadToken(client *cloudflare.Client, cfg *config.Config) (*auth.Token, error) {
 	response, err := client.Pages.Projects.GetUploadToken(
 		context.TODO(),
 		cfg.ProjectName,
@@ -18,8 +19,25 @@ func GetUploadToken(client *cloudflare.Client, cfg *config.Config) (string, erro
 		},
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	logging.Debug("upload token", "jwt", response.JWT)
-	return response.JWT, nil
+	token, err := auth.New(response.JWT)
+	if err != nil {
+		return nil, err
+	}
+	logging.Info("successfully generated the upload token")
+	return token, nil
+}
+
+func RefreshTokenIfExpired(client *cloudflare.Client, cfg *config.Config, auth *auth.Token) (*auth.Token, error) {
+	if auth.IsExpired() {
+		logging.Debug("upload token is expired, getting a new one")
+		return GenUploadToken(
+			client,
+			cfg,
+		)
+	} else {
+		logging.Debug("upload token is not expired, reusing the same one")
+		return auth, nil
+	}
 }

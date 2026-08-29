@@ -16,19 +16,17 @@ func main() {
 	if err != nil {
 		logging.Fatal(err)
 	}
-	logging.Init(cfg.LogLevel)
-	logging.Debug("parsed flags", cfg)
 
 	manifest, err := manifest.GenerateHashMap(cfg.Folder)
 
 	if err != nil {
 		logging.Fatal(err)
 	}
-	logging.Info("generated hashmap", "count", manifest.Len())
+	logging.Info("detected files for upload", "count", manifest.Len())
 
 	client := cf.WithClient(cfg)
 
-	uploadToken, err := cf.GetUploadToken(client, cfg)
+	uploadToken, err := cf.GenUploadToken(client, cfg)
 
 	if err != nil {
 		logging.Fatal(err)
@@ -40,11 +38,21 @@ func main() {
 		logging.Fatal(err)
 	}
 
-	logging.Info("files that need to be uploaded", "count", missingFiles.Len())
-
 	cf.UploadAssets(client, missingFiles, cfg, uploadToken)
 
 	deploymentInfo, err := cf.CreateDeployment(client, cfg, manifest)
+
+	if err != nil {
+		logging.Fatal(err)
+	}
+
+	uploadToken, err = cf.RefreshTokenIfExpired(client, cfg, uploadToken)
+
+	if err != nil {
+		logging.Fatal(err)
+	}
+
+	err = cf.UpsertAssetHashes(client, missingFiles, uploadToken)
 
 	if err != nil {
 		logging.Fatal(err)

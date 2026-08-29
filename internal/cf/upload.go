@@ -3,6 +3,7 @@ package cf
 import (
 	"context"
 	"encoding/base64"
+	"epage/internal/auth"
 	"epage/internal/config"
 	"epage/internal/logging"
 	"epage/internal/manifest"
@@ -18,9 +19,9 @@ func UploadAssets(
 	client *cloudflare.Client,
 	manifest *manifest.Manifest,
 	cfg *config.Config,
-	uploadToken string,
+	token *auth.Token,
 ) {
-	logging.Info("uploading assets", "count", manifest.Len())
+	logging.Info("start uploading assets")
 
 	batch := make([]pages.AssetUploadParamsBody, 0, cfg.MaxUploadCount)
 
@@ -28,7 +29,13 @@ func UploadAssets(
 		fullPath := fmt.Sprintf("%s/%s", cfg.Folder, entry.Path)
 		fileBytes, err := os.ReadFile(fullPath)
 		if err != nil {
-			fmt.Printf("Warning: failed to read file %s: %v\n", fullPath, err)
+			logging.Warn(
+				"Warning: failed to read file",
+				"file",
+				fullPath,
+				"error",
+				err.Error(),
+			)
 			continue
 		}
 
@@ -41,27 +48,33 @@ func UploadAssets(
 		})
 
 		if len(batch) >= int(cfg.MaxUploadCount) {
-			sendBatch(client, batch, uploadToken)
+			sendBatch(client, batch, token)
 			batch = batch[:0]
 		}
 	}
 
 	if len(batch) > 0 {
-		sendBatch(client, batch, uploadToken)
+		sendBatch(client, batch, token)
 	}
-	logging.Info("batch uploaded")
 }
 
-func sendBatch(client *cloudflare.Client, batch []pages.AssetUploadParamsBody, uploadToken string) {
+func sendBatch(client *cloudflare.Client, batch []pages.AssetUploadParamsBody, token *auth.Token) {
 	_, err := client.Pages.Assets.Upload(
 		context.TODO(),
 		pages.AssetUploadParams{
 			Body: batch,
 		},
-		option.WithHeader("Authorization", fmt.Sprintf("Bearer %s", uploadToken)),
+		option.WithHeader(
+			"Authorization",
+			fmt.Sprintf("Bearer %s", token.Raw),
+		),
 	)
 	if err != nil {
-		panic(fmt.Sprintf("Failed to upload asset batch: %s", err.Error()))
+		logging.Error(
+			"Failed to upload asset batch",
+			"error",
+			err.Error(),
+		)
 	}
 	logging.Debug("uploaded a batch", "count", len(batch))
 }
