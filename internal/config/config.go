@@ -17,6 +17,13 @@ var (
 	folder         *string
 	logLevel       *string
 	maxUploadCount *uint16
+	versionFlag    *bool
+)
+
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
 )
 
 type Config struct {
@@ -64,6 +71,12 @@ func DefineFlags() {
 		uint16(500),
 		"The maximum number of files to be uploaded at once",
 	)
+	versionFlag = pflag.BoolP(
+		"version",
+		"v",
+		false,
+		"Prints the version",
+	)
 }
 
 func ParseConfig() (*Config, error) {
@@ -72,6 +85,11 @@ func ParseConfig() (*Config, error) {
 	if len(os.Args) == 1 || (len(os.Args) == 2 && (os.Args[1] == "-h" || os.Args[1] == "--help")) {
 		pflag.Usage()
 		return &Config{}, errors.New("")
+	}
+
+	if *versionFlag {
+		fmt.Printf("epage %s (commit %s, built %s)\n", version, commit, date)
+		os.Exit(0)
 	}
 
 	logLevel, err := logging.ParseLevel(*logLevel)

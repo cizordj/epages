@@ -35,8 +35,11 @@ overhead that comes with either.
 To build the project for the ARM64 architecture with static linking, use the
 following command:
 
-```bash
-GOOS=linux GOARCH=arm64 go build -v -ldflags="-s -w" cmd/epage/main.go
+```sh
+env \
+    GOOS=linux \
+    GOARCH=arm64 \
+    make
 ```
 
 This command sets the target operating system to Linux and the architecture to
