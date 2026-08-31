@@ -1,10 +1,10 @@
 package main
 
 import (
-	"epage/internal/cf"
-	"epage/internal/config"
-	"epage/internal/logging"
-	"epage/internal/manifest"
+	"epages/internal/cf"
+	"epages/internal/config"
+	"epages/internal/logging"
+	"epages/internal/manifest"
 )
 
 func init() {

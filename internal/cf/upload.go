@@ -3,11 +3,11 @@ package cf
 import (
 	"context"
 	"encoding/base64"
-	"epage/internal/auth"
-	"epage/internal/config"
-	"epage/internal/contenttype"
-	"epage/internal/logging"
-	"epage/internal/manifest"
+	"epages/internal/auth"
+	"epages/internal/config"
+	"epages/internal/contenttype"
+	"epages/internal/logging"
+	"epages/internal/manifest"
 	"fmt"
 	"os"
 

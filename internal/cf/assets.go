@@ -2,9 +2,9 @@ package cf
 
 import (
 	"context"
-	"epage/internal/auth"
-	"epage/internal/logging"
-	"epage/internal/manifest"
+	"epages/internal/auth"
+	"epages/internal/logging"
+	"epages/internal/manifest"
 	"fmt"
 
 	"github.com/cloudflare/cloudflare-go/v7"

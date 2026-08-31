@@ -1,7 +1,7 @@
 package config
 
 import (
-	"epage/internal/logging"
+	"epages/internal/logging"
 	"errors"
 	"fmt"
 	"os"
@@ -122,6 +122,16 @@ func ParseConfig() (*Config, error) {
 	}
 
 	missingFlags = nil
+
+	logging.Info(
+		"starting epages",
+		"version",
+		version,
+		"commit",
+		commit,
+		"date",
+		date,
+	)
 
 	return &Config{
 		Token:          *token,

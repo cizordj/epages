@@ -1,4 +1,4 @@
-module epage
+module epages
 
 go 1.26.5
 

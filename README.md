@@ -1,10 +1,10 @@
-# epage
+# epages
 
 A Cloudflare pages' deployer written in Go.
 
 ## Use case
 
-`epage` exists to deploy to Cloudflare Pages from low-end, resource-constrained devices
+`epages` exists to deploy to Cloudflare Pages from low-end, resource-constrained devices
 that can't comfortably run the standard Node.js/`wrangler` toolchain — the Brume 2 being
 a prime example.
 
@@ -17,7 +17,7 @@ that ships with Brume 2 is quite old, and `wrangler` complains about (or outrigh
 to run on) outdated Node runtimes. A vendorized Node environment capable of running
 `wrangler` is also heavy for a small, low-memory device.
 
-`epage` solves this by being:
+`epages` solves this by being:
 
 - **Native, no containers** — runs directly on the device, no Docker required at all.
 - **Written entirely in Go** — no dependency on OS-provided libraries or a Node.js runtime.
@@ -26,7 +26,7 @@ to run on) outdated Node runtimes. A vendorized Node environment capable of runn
 - **Fast** — starts up and deploys quicker than spinning up a full Node/`wrangler`
   environment.
 
-In short, `epage` lets you build a deployment pipeline for Cloudflare Pages that runs
+In short, `epages` lets you build a deployment pipeline for Cloudflare Pages that runs
 natively on devices like the Brume 2, without Docker, without Node.js, and without the
 overhead that comes with either.
 

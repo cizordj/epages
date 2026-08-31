@@ -1,7 +1,7 @@
 package cf
 
 import (
-	"epage/internal/config"
+	"epages/internal/config"
 
 	"github.com/cloudflare/cloudflare-go/v7"
 	"github.com/cloudflare/cloudflare-go/v7/option"

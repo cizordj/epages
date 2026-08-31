@@ -3,10 +3,10 @@ package cf
 import (
 	"context"
 	"encoding/json"
-	"epage/internal/config"
-	"epage/internal/gitinfo"
-	"epage/internal/logging"
-	"epage/internal/manifest"
+	"epages/internal/config"
+	"epages/internal/gitinfo"
+	"epages/internal/logging"
+	"epages/internal/manifest"
 	"os"
 	"path/filepath"
 
