@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"epage/internal/config"
+	"epage/internal/gitinfo"
 	"epage/internal/logging"
 	"epage/internal/manifest"
 	"os"
@@ -61,10 +62,39 @@ func CreateDeployment(
 		if err != nil {
 			logging.Warn(err)
 		} else {
-			params.Headers = cloudflare.FileParam(
+			params.Redirects = cloudflare.FileParam(
 				fileHandle,
 				filepath.Base(redirectsEntry.Path),
 				"text/plain",
+			)
+		}
+	}
+
+	pwd, err := os.Getwd()
+	
+	if err != nil {
+		logging.Warn(err.Error())
+	} else {
+		repoInfo := gitinfo.Discover(pwd)
+
+		if len(repoInfo.Branch) > 0 {
+			params.Branch = cloudflare.F(
+				repoInfo.Branch,
+			)
+		}
+		if repoInfo.Dirty {
+			params.CommitDirty = cloudflare.F(
+				pages.ProjectDeploymentNewParamsCommitDirtyTrue,
+			)
+		}
+		if repoInfo.Hash != "" {
+			params.CommitHash = cloudflare.F(
+				repoInfo.Hash,
+			)
+		}
+		if repoInfo.Message != "" {
+			params.CommitMessage = cloudflare.F(
+				repoInfo.Message,
 			)
 		}
 	}

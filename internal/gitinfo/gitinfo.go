@@ -12,9 +12,6 @@ type Info struct {
 	Dirty   bool
 }
 
-// Discover returns best-effort git metadata for dir. If dir isn't a git
-// repo (or git isn't installed), it returns a zero Info and a nil error —
-// git metadata is optional, not fatal.
 func Discover(dir string) Info {
 	branch, _ := run(dir, "rev-parse", "--abbrev-ref", "HEAD")
 	hash, _ := run(dir, "rev-parse", "HEAD")
