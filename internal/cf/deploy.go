@@ -71,31 +71,37 @@ func CreateDeployment(
 	}
 
 	pwd, err := os.Getwd()
-	
+
 	if err != nil {
 		logging.Warn(err.Error())
 	} else {
-		repoInfo := gitinfo.Discover(pwd)
+		repoInfo, err := gitinfo.Discover(pwd)
 
-		if len(repoInfo.Branch) > 0 {
+		if err != nil {
+			logging.Warn(
+				"could not discover git repository information",
+				"error",
+				err,
+			)
+		} else {
 			params.Branch = cloudflare.F(
 				repoInfo.Branch,
 			)
-		}
-		if repoInfo.Dirty {
-			params.CommitDirty = cloudflare.F(
-				pages.ProjectDeploymentNewParamsCommitDirtyTrue,
-			)
-		}
-		if repoInfo.Hash != "" {
 			params.CommitHash = cloudflare.F(
 				repoInfo.Hash,
 			)
-		}
-		if repoInfo.Message != "" {
 			params.CommitMessage = cloudflare.F(
 				repoInfo.Message,
 			)
+			if repoInfo.Dirty {
+				params.CommitDirty = cloudflare.F(
+					pages.ProjectDeploymentNewParamsCommitDirtyTrue,
+				)
+			} else {
+				params.CommitDirty = cloudflare.F(
+					pages.ProjectDeploymentNewParamsCommitDirtyFalse,
+				)
+			}
 		}
 	}
 
