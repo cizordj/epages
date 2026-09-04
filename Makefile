@@ -11,3 +11,5 @@ all:
 	go build -ldflags "$(LDFLAGS)" -o bin/epages cmd/epages/main.go
 clean:
 	rm -rf bin
+tests:
+	go test ./internal/contenttype/

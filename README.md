@@ -36,8 +36,5 @@ To build the project for the ARM64 architecture with static linking, use the
 following command:
 
 ```sh
-env \
-    GOOS=linux \
-    GOARCH=arm64 \
-    make
+env GOOS=linux GOARCH=arm64 make
 ```
