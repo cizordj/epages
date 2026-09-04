@@ -41,8 +41,3 @@ env \
     GOARCH=arm64 \
     make
 ```
-
-This command sets the target operating system to Linux and the architecture to
-ARM64, and then builds the binary while stripping debugging symbols and writing
-full debug information, resulting in a statically linked binary suitable for
-ARM64 environments.
