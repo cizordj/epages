@@ -2,6 +2,16 @@
 
 A Cloudflare pages' deployer written in Go.
 
+## Example
+
+```sh
+./bin/epages \
+	--account-id $CLOUDFLARE_ACCOUNT_ID \
+	--api-token $CLOUDFLARE_API_TOKEN \
+	--folder ./public \
+	--project-name $CLOUDFLARE_PROJECT_NAME
+```
+
 ## Use case
 
 `epages` exists to deploy to Cloudflare Pages from low-end, resource-constrained devices
